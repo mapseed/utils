@@ -1,8 +1,10 @@
 from __future__ import print_function
 # import code
+from time import sleep
 import csv
 import argparse
-from geopy.geocoders import Nominatim
+# from geopy.geocoders import Nominatim
+from geopy.geocoders import GoogleV3
 
 __author__ = "Luke Swart"
 
@@ -40,7 +42,8 @@ def process_rain_gardens(readFile, writeFile):
     fieldnames = reader.fieldnames
     writer = csv.DictWriter(writeFile, fieldnames=fieldnames)
     writer.writeheader()
-    geolocator = Nominatim()
+    # geolocator = Nominatim()
+    geolocator = GoogleV3()
     for row in reader:
         # if lat/lon not defined, then fill it in with the geocoding
         # Uncomment this for testing in interactive mode
