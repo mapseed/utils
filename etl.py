@@ -72,22 +72,15 @@ def process_rain_gardens(readFile, writeFile):
             # snip off least-significant location until we get a location
             while not location:
                 garden_address = ', '.join(address_list)
-                try:
-                    location = geolocator.geocode(garden_address)
-                except GeocoderTimedOut as e:
-                    print("\n\n\nGEOCODER TIMED OUT FOR ADDRESS:",
-                          full_address)
-                    print("exception:", e, "\n\n\n")
-                    # If there is a timeout, replicate the row.
-                    location = {'latitude': '', 'longitude': ''}
-                    break
+                print("address_list:", address_list)
+                location = geolocator.geocode(garden_address)
+                sleep(5)
                 address_list = address_list[1:]
                 if len(address_list) == 0:
                     raise Exception("\n\n\nNO LOCATION FOUND FOR ADDRESS:",
-                                    full_address, "\n\n\n")
+                                    full_address, "at row:", row, "\n\n\n")
 
-            print("adding address_list location:", address_list)
-            print("for the full_address:", full_address)
+            print("full_address:", full_address)
             row['Lat'] = str(location.latitude)
             row['Long'] = str(location.longitude)
 
