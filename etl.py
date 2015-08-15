@@ -47,6 +47,10 @@ def process_rain_gardens(readFile, writeFile):
         # code.interact(local=locals())
         lat = row['Lat']
         lon = row['Long']
+        if not [True for v in row.values() if v.strip()]:
+            print("Empty row:", row, ", skipping and continuing...")
+            continue
+
         if lat == '' or lon == '':
             # print("replace lat/lon for row :", row)
 
