@@ -11,6 +11,7 @@ __author__ = "Luke Swart"
 
 def etl():
     # Define our CLI arguments
+    # example usage: `python etl.py -m rain raingardensTest.csv test.csv`
     parser = argparse.ArgumentParser(description="Manage various etl tasks")
 
     parser.add_argument('input', type=argparse.FileType('r'),
@@ -19,15 +20,16 @@ def etl():
     parser.add_argument('output', type=argparse.FileType('w'),
                         help='output csv file')
 
-    parser.add_argument('-m', '--method', action="store_true", dest="rain",
-                        default=True,
-                        help="Rain garden tranform type requested")
+    parser.add_argument('-m', '--method', dest="method",
+                        default="rain",
+                        help="Defines which method will process the file")
+
     args = parser.parse_args()
 
     print(args)
-    if args.rain:
-        # print("input:", args.input)
-        # print("output:", args.output)
+    if args.method == "rain":
+        print("input:", args.input)
+        print("output:", args.output)
         with args.input as readFile, args.output as writeFile:
             process_rain_gardens(readFile, writeFile)
         print("transformed csv from", args.output, "into", args.input)
@@ -57,20 +59,14 @@ def process_rain_gardens(readFile, writeFile):
         if lat == '' or lon == '':
             # print("replace lat/lon for row :", row)
 
-            street_address = row['Street Address ']
-            if street_address == 'NULL':
-                street_address = ''
+            street_address = row['Street Address']
 
-            zipcode = row['Zip Code ']
-            if zipcode == 'NULL':
-                zipcode = ''
+            zipcode = row['Zip Code']
 
             city = row['City']
-            if city == 'NULL':
-                city = ''
 
             full_address = [street_address, city, 'WA', zipcode]
-            address_list = [x for x in full_address if x]
+            address_list = [x for x in full_address if (x and x != 'NULL')]
 
             # garden_address = ', '.join(address_list)
             # location = geolocator.geocode(garden_address)
