@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import print_function
 # import code
 from time import sleep
@@ -32,6 +34,11 @@ def etl():
         print("output:", args.output)
         with args.input as readFile, args.output as writeFile:
             process_rain_gardens(readFile, writeFile)
+        print("transformed csv from", args.output, "into", args.input)
+    elif args.method == "geocode":
+        from geocode import geocode
+        with args.input as readFile, args.output as writeFile:
+            geocode(readFile, writeFile)
         print("transformed csv from", args.output, "into", args.input)
 
 
