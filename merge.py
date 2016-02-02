@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 # import code
-# from time import sleep
 import csv
 import argparse
 
@@ -18,11 +17,23 @@ MERGE_MANY_REFERENCE_COLUMN = 'ID'
 MERGE_ONE_REFERENCE_COLUMN = 'ID'
 
 # An array of column names for the columns that will be merged.
-# TODO: If the column names between the merge and destination csv's are not
-# identical, use an array of tuples containing the matching merge and
-# destination columns
-OVERRIDING_COLUMNS = ['PROJECT_DATE', 'END_DATE', 'LOCATION_LATITUDE',
-                      'LOCATION_LONGITUDE', 'LOCATION_LINK']
+# If the column names between the 'merge-many' and 'merge-one' csv's are not
+# identical, use a tuple containing the matching 'merge-many' and
+# 'merge-one' columns
+OVERRIDING_COLUMNS = [('Name', 'PROJECT_NAME_MERGED'), 'PROJECT_DATE',
+                      'END_DATE', 'LOCATION_LATITUDE', 'LOCATION_LONGITUDE',
+                      'LOCATION_LINK']
+
+# Set to False if we are just using the old headers
+# NEW_HEADERS = False
+NEW_HEADERS = ['PROJECT_NAME', 'PROJECT_NAME_MERGED', 'PROJECT_TYPE',
+               'PROJECT_TYPE_CODE', 'ID', 'ORGANIZATIONS',
+               'PROJECT_DESCRIPTION', 'Address / Location name',
+               'LOCATION_LATITUDE', 'LOCATION_LONGITUDE', 'LOCATION_LINK',
+               'UPLOAD_PHOTO', 'DOC_LINK', 'CONTACT_EMAIL',
+               'CONTACT_ORGANIZATION', 'CONTACT_PHONE', 'CONTACT_WEBSITE',
+               'SOCIAL_LINK', 'DATA_ENTRY_NAME', 'DATA_ENTRY_PHONE',
+               'PROJECT_DATE', 'END_DATE', 'DATE_NOTE']
 
 
 def run():
@@ -64,7 +75,10 @@ def merge(merge_many_file, merge_one_file, destination_file):
     merge_one_reader = csv.DictReader(merge_one_file)
     # Uncomment this for testing in interactive mode
     # code.interact(local=locals())
-    fieldnames = merge_one_reader.fieldnames
+    if NEW_HEADERS:
+        fieldnames = NEW_HEADERS
+    else:
+        fieldnames = merge_one_reader.fieldnames
     print("fieldnames:", fieldnames)
     destinationWriter = csv.DictWriter(destination_file, fieldnames=fieldnames)
     destinationWriter.writeheader()
@@ -83,11 +97,19 @@ def merge(merge_many_file, merge_one_file, destination_file):
                 # If the row had nested (mutable) data types,
                 # we'd need to clone it (can also use copy.deepcopy()):
                 # new_row = dict((k,v) for k,v in row.items())
-                new_row[column] = matching_many_row[column]
+                if isinstance(column, tuple):
+                    print("setting column tuple:", matching_many_row[column[0]])
+                    new_row[column[1]] = matching_many_row[column[0]]
+                else:
+                    new_row[column] = matching_many_row[column]
             print("writing new_row:", new_row)
             destinationWriter.writerow(new_row)
         if len(matching_many_rows) == 0:
             print("No matching rows for id:", reference_value)
+            # if NEW_HEADERS:
+            #     for header in NEW_HEADERS:
+            #         if not row.get(header):
+            #             row[header] = ''
             destinationWriter.writerow(row)
         merge_many_file.seek(0)
         merge_many_reader = csv.DictReader(merge_many_file)
