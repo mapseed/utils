@@ -16,6 +16,11 @@ LON_COLUMN = 'LOCATION_LONGITUDE'
 
 ADDRESS_COLUMN = 'Address / Location name'
 
+# Configure whether we want to insert an extra column after the longitude
+# column that will contain the results of the geocode
+INCLUDE_GEOCODE_RESULTS_COLUMN = True
+GEOCODE_RESULTS = 'GEOCODE_RESULTS'
+
 __author__ = "Luke Swart"
 
 
@@ -50,6 +55,10 @@ def geocode(readFile, writeFile):
     # Uncomment this for testing in interactive mode
     # code.interact(local=locals())
     fieldnames = reader.fieldnames
+    # Add
+    if INCLUDE_GEOCODE_RESULTS_COLUMN:
+        lon_index = fieldnames.index(LON_COLUMN)
+        fieldnames.insert(lon_index + 1, 'GEOCODE_RESULTS')
     writer = csv.DictWriter(writeFile, fieldnames=fieldnames)
     writer.writeheader()
     # geolocator = Nominatim()
@@ -61,9 +70,9 @@ def geocode(readFile, writeFile):
         lat = row[LAT_COLUMN]
         lon = row[LON_COLUMN]
         # Skip empty rows:
-        if not [True for v in row.values() if v.strip()]:
-            print("Empty row:", row, ", skipping and continuing...")
-            continue
+        # if not [True for v in row.values() if v.strip()]:
+        #     print("Empty row:", row, ", skipping and continuing...")
+        #     continue
 
         if lat == '' or lon == '':
             # print("replace lat/lon for row :", row)
@@ -80,6 +89,8 @@ def geocode(readFile, writeFile):
             final_address = ', '.join(address_list)
             location = geolocator.geocode(final_address)
             print("geocoded location:", location)
+            if INCLUDE_GEOCODE_RESULTS_COLUMN:
+                row['GEOCODE_RESULTS'] = location
             sleep(5)
 
             # Use this if we want to generalize our addresses further:
@@ -98,6 +109,9 @@ def geocode(readFile, writeFile):
             # print("full_address:", full_address)
             row[LAT_COLUMN] = str(location.latitude)
             row[LON_COLUMN] = str(location.longitude)
+
+        elif INCLUDE_GEOCODE_RESULTS_COLUMN:
+            row[GEOCODE_RESULTS] = ''
 
         writer.writerow(row)
 
